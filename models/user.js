@@ -23,16 +23,16 @@ const userSchema = Schema({
         type: String,
         required: true
     },
-    areas: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Area"
-        }
-    ],
     shops: [
         {
             type: Schema.Types.ObjectId,
             ref: "Shop"
+        }
+    ],
+    areas: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Area"
         }
     ],
     role: {

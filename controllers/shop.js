@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Shop = require("../models/shop");
 const Area = require("../models/area");
+const User = require("../models/user");
 
 exports.addShop = async (req, res, next) => {
     const errors = validationResult(req);
@@ -15,6 +16,15 @@ exports.addShop = async (req, res, next) => {
     const ownerCnic = req.body.ownerCnic;
     const area = req.body.area;
 
+    const user = await User.findById(
+        req.body.user//testing Only
+        // req.userId
+    );
+    if (!user) {
+        const error = new Error("User not authorized");
+        error.statusCode = 422;
+        throw error;
+    }
     const savedAreas = await Area.findOne({ areaName: area })
     if (!savedAreas) {
         const error = new Error("No or Wrong Area Provided");
@@ -29,11 +39,14 @@ exports.addShop = async (req, res, next) => {
         ownerCnic: ownerCnic,
         area: area,
         // user: req.userId
-        user: req.body.user
+        user: req.body.user//testing Only
     })
 
     try {
-        await shop.save();
+        const result = await shop.save();
+
+        user.shops.push(result._id);
+        await user.save();
         res.status(200).json({ message: "Shop created successfully!", shop: shop });
     }
     catch (error) {
@@ -62,6 +75,7 @@ exports.updateShop = async (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
+    const shopId = req.params.shopId
     const shopName = req.body.shopName;
     const registration = req.body.registration;
     const ownerPhoneNo = req.body.ownerPhoneNo;
@@ -89,16 +103,49 @@ exports.updateShop = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
-        
+
         shop.shopName = shopName;
         shop.registration = registration;
         shop.ownerPhoneNo = ownerPhoneNo;
         shop.ownerCnic = ownerCnic;
 
         const updatedShop = await shop.save();
-        res.status(200).json({message: "Shop Updated Successfully!", shop: updatedShop});
+        res.status(200).json({ message: "Shop Updated Successfully!", shop: updatedShop });
 
     } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+          }
+          next(error);
+    }
+}
 
+exports.deleteShop = async (req, res, next) => {
+    const shopId = req.params.shopId;
+    try {
+        const shop = await Shop.findById(shopId);
+        if (!shop) {
+            const error = new Error("No Shop found!");
+            error.statusCode = 404;
+            throw error;
+        }
+        if (shop.user.toString() !== req.body.user) {
+            const error = new Error("Not Authorized!");
+            error.statusCode = 422;
+            throw error;
+        }
+        await Shop.findByIdAndRemove(shopId);
+        const user = await User.findById(
+            req.body.user
+            // req.userId
+        )
+        user.shops.pull(shopId);
+        await user.save();
+        res.status(200).json({ message: "Shop Deleted!" });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+          }
+          next(error);
     }
 }

@@ -27,7 +27,9 @@ router.put("/add-shop", [
         .notEmpty()
         .trim()
 ], isAuth, shopController.addShop);
+
 router.get("/shop/:shopId", isAuth, shopController.getShop);
+
 router.patch("/edit-shop/:shopId", [
     body("shopName")
         .trim()
@@ -49,7 +51,8 @@ router.patch("/edit-shop/:shopId", [
         .notEmpty()
         .trim()
 ], isAuth, shopController.updateShop);
-// router.delete("/shop/:shopId");
+
+router.delete("/shop/:shopId", isAuth, shopController.deleteShop);
 
 router.put("/add-area", [
     body("areaName")

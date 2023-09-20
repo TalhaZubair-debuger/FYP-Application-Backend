@@ -5,41 +5,49 @@ const User = require("../models/user")
 const router = express.Router();
 
 
-router.put("/signup", 
-[
+router.put("/signup",
+    [
+        body("email")
+            .isEmail()
+            .withMessage("Enter a valid email")
+            .custom((value, { req }) => {
+                return User.findOne({ email: value })
+                    .then(userDoc => {
+                        if (userDoc) {
+                            return Promise.reject("Email already exists!")
+                        }
+                    })
+            })
+            .normalizeEmail(),
+        body("password")
+            .trim()
+            .isLength({ min: 5 }),
+        body("name")
+            .trim()
+            .not()
+            .isEmpty(),
+        body("number")
+            .isNumeric()
+            .isLength({ min: 10 })
+            .withMessage("Please enter Phone No. of valid length")
+            .not()
+            .isEmpty(),
+        body("cnic")
+            .isNumeric()
+            .trim()
+            .not()
+            .isEmpty()
+    ]
+    , authController.signup);
+
+router.post("/login", [
     body("email")
         .isEmail()
         .withMessage("Enter a valid email")
-        .custom((value, { req }) => {
-            return User.findOne({ email: value })
-                .then(userDoc => {
-                    if (userDoc) {
-                        return Promise.reject("Email already exists!")
-                    }
-                })
-        })
         .normalizeEmail(),
     body("password")
         .trim()
         .isLength({ min: 5 }),
-    body("name")
-        .trim()
-        .not()
-        .isEmpty(),
-    body("number")
-        .isNumeric()
-        .isLength({ min: 10 })
-        .withMessage("Please enter Phone No. of valid length")
-        .not()
-        .isEmpty(),
-    body("cnic")
-        .isNumeric()
-        .trim()
-        .not()
-        .isEmpty()
-]
-, authController.signup);
-
-router.post("/login", authController.login);
+], authController.login);
 
 module.exports = router;
