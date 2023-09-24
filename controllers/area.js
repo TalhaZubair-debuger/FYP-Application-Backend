@@ -37,8 +37,8 @@ exports.addArea = async (req, res, next) => {
 }
 
 exports.deleteArea = async (req, res, next) => {
-    const areaName = req.params.areaName;
-    const area = await Area.findOne({ areaName: areaName, user: req.body.user });//testing
+    const areaId = req.params.areaId;
+    const area = await Area.findOne({ areaId: areaId, user: req.body.user });//testing
     if (area.length === 0) {
         const error = new Error("Area Could not be found!");
         error.statusCode = 404;

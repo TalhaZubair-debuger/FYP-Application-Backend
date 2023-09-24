@@ -66,6 +66,6 @@ router.put("/add-area", [
         .trim()
 ], isAuth, areaController.addArea);
 
-router.delete("/delete-area/:areaName", isAuth, areaController.deleteArea);
+router.delete("/delete-area/:areaId", isAuth, areaController.deleteArea);
 
 module.exports = router;

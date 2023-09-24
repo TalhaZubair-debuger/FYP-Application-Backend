@@ -1,13 +1,14 @@
 const express = require("express");
 const authRoutes = require("./routes/auth");
-const authShopAndAreas = require("./routes/shopAndAreas");
+const shopAndAreasRoutes = require("./routes/shopAndAreas");
+const productRoutes = require("./routes/products");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 require('dotenv').config();
 
 
-const MONGO_URI = 
-`mongodb+srv://talhazubairinfo:${process.env.DB_PASSWORD}@fyp-cluter.qauvmhw.mongodb.net/DistributionApp?retryWrites=true&w=majority`;
+const MONGO_URI =
+    `mongodb+srv://talhazubairinfo:${process.env.DB_PASSWORD}@fyp-cluter.qauvmhw.mongodb.net/DistributionApp?retryWrites=true&w=majority`;
 const app = express();
 
 app.use(bodyParser.json());
@@ -20,15 +21,16 @@ app.use((req, res, next) => {
 })
 
 app.use("/user", authRoutes);
-app.use("/shops", authShopAndAreas);
+app.use("/shops", shopAndAreasRoutes);
+app.use("/products", productRoutes);
 
 
 mongoose.connect(MONGO_URI)
-.then(() => {
-    console.log("MongoDB Connected!");
-    app.listen(8080);
-})
-.catch(err => console.log(err))
+    .then(() => {
+        console.log("MongoDB Connected!");
+        app.listen(8080);
+    })
+    .catch(err => console.log(err))
 
 app.use((error, req, res, next) => {
     console.log(error);
