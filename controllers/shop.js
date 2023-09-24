@@ -25,10 +25,10 @@ exports.addShop = async (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
-    const savedAreas = await Area.findOne({ areaName: area })
+    const savedAreas = await Area.findOne({ areaName: area, user: req.body.user });
     if (!savedAreas) {
         const error = new Error("No or Wrong Area Provided");
-        error.statusCode = 422;
+        error.statusCode = 404;
         throw error;
     }
 
@@ -59,13 +59,23 @@ exports.addShop = async (req, res, next) => {
 
 exports.getShop = async (req, res, next) => {
     const shopId = req.params.shopId;
-    const shop = await Shop.findOne({ _id: shopId });
+    const shop = await Shop.findOne({ _id: shopId, user: req.body.user });//testing
     if (!shop) {
         const error = new Error("No Shop Found!");
         error.statusCode = 404;
         throw error;
     }
     res.status(200).json({ message: "Shop found", shop: shop });
+}
+
+exports.getAllShops = async (req, res, next) => {
+    const shop = await Shop.find({ user: req.body.user });//testing
+    if (shop.length === 0) {
+        const error = new Error("No Shops Found!");
+        error.statusCode = 404;
+        throw error;
+    }
+    res.status(200).json({ message: "Shops found", shops: shop });
 }
 
 exports.updateShop = async (req, res, next) => {
@@ -82,14 +92,14 @@ exports.updateShop = async (req, res, next) => {
     const ownerCnic = req.body.ownerCnic;
     const area = req.body.area;
 
-    const savedAreas = await Area.findOne({ areaName: area })
+    const savedAreas = await Area.findOne({ areaName: area, user: req.body.user })//testing
     if (!savedAreas) {
         const error = new Error("No or Wrong Area Provided");
-        error.statusCode = 422;
+        error.statusCode = 404;
         throw error;
     }
     try {
-        const shop = await Shop.findById({ _id: shopId });
+        const shop = await Shop.findOne({ _id: shopId, user: req.body.user });//testing
         if (!shop) {
             const error = new Error("No Shop Found");
             error.statusCode = 404;
@@ -98,7 +108,7 @@ exports.updateShop = async (req, res, next) => {
         if (shop.user.toString()
             !==
             // req.userId
-            req.body.user) {
+            req.body.user) {//testing
             const error = new Error("Not Authorized!");
             error.statusCode = 403;
             throw error;
@@ -115,15 +125,15 @@ exports.updateShop = async (req, res, next) => {
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
-          }
-          next(error);
+        }
+        next(error);
     }
 }
 
 exports.deleteShop = async (req, res, next) => {
     const shopId = req.params.shopId;
     try {
-        const shop = await Shop.findById(shopId);
+        const shop = await Shop.findOne({_id: shopId, user: req.body.user});//testing
         if (!shop) {
             const error = new Error("No Shop found!");
             error.statusCode = 404;
@@ -134,7 +144,7 @@ exports.deleteShop = async (req, res, next) => {
             error.statusCode = 422;
             throw error;
         }
-        await Shop.findByIdAndRemove(shopId);
+        await Shop.findOneAndDelete({_id: shopId, user: req.body.user});
         const user = await User.findById(
             req.body.user
             // req.userId
@@ -145,7 +155,7 @@ exports.deleteShop = async (req, res, next) => {
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
-          }
-          next(error);
+        }
+        next(error);
     }
 }

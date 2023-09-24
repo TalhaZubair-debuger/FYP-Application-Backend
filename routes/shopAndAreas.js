@@ -30,6 +30,8 @@ router.put("/add-shop", [
 
 router.get("/shop/:shopId", isAuth, shopController.getShop);
 
+router.get("/shop", isAuth, shopController.getAllShops);
+
 router.patch("/edit-shop/:shopId", [
     body("shopName")
         .trim()
@@ -63,5 +65,7 @@ router.put("/add-area", [
         .notEmpty()
         .trim()
 ], isAuth, areaController.addArea);
+
+router.delete("/delete-area/:areaName", isAuth, areaController.deleteArea);
 
 module.exports = router;
