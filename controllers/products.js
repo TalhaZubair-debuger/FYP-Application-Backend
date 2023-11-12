@@ -13,7 +13,7 @@ exports.addProduct = async (req, res, next) => {
     const productName = req.body.productName;
     const price = req.body.price;
     const stockQuantity = req.body.stockQuantity;
-    const user = req.body.user;//testing
+    const user = req.userId;
 
     try {
         const checkProductAlreadyExists = await Product.findOne({ productName: productName, user: user });
@@ -104,7 +104,7 @@ exports.getProduct = async (req, res, next) => {
 }
 
 exports.getAllProducts = async (req, res, next) => {
-    const user = req.body.user;//testing
+    const user = req.userId;
 
     try {
         const products = await Product.find({ user: user });

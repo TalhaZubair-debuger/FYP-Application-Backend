@@ -14,7 +14,7 @@ exports.addArea = async (req, res, next) => {
     const areaCode = req.body.areaCode;
 
     try {
-        const checkAreaAlreadyExists = await Area.findOne({ areaName: areaName, user: req.body.user });//testing
+        const checkAreaAlreadyExists = await Area.findOne({ areaName: areaName, user: req.userId });
         if (checkAreaAlreadyExists) {
             const error = new Error("Area Already exits!");
             error.statusCode = 409;
@@ -23,11 +23,11 @@ exports.addArea = async (req, res, next) => {
         const area = new Area({
             areaName: areaName,
             areaCode: areaCode,
-            // user: req.userId
-            user: req.body.user
-        })//testing
+            user: req.userId
+            // user: req.body.user
+        })
         await area.save();
-        res.status(201).json({ message: "Area Created Successfully!", userId: req.body.user })//testing
+        res.status(201).json({ message: "Area Created Successfully!", userId: req.userId })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

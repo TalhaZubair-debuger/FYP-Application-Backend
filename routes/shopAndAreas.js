@@ -6,27 +6,29 @@ const areaController = require("../controllers/area");
 
 const router = express.Router();
 
-router.put("/add-shop", [
-    body("shopName")
-        .trim()
-        .notEmpty(),
-    body("registration")
-        .trim()
-        .isNumeric()
-        .isLength({ min: 5, max: 6 })
-        .notEmpty(),
-    body("ownerPhoneNo")
-        .trim()
-        .isNumeric()
-        .isLength({ min: 10 }),
-    body("ownerCnic")
-        .trim()
-        .isNumeric()
-        .notEmpty(),
-    body("area")
-        .notEmpty()
-        .trim()
-], isAuth, shopController.addShop);
+router.put("/add-shop", 
+// [
+    // body("shopName")
+    //     .trim()
+    //     .notEmpty(),
+    // body("registration")
+    //     .trim()
+    //     .isNumeric()
+    //     .isLength({ min: 5 })
+    //     .notEmpty(),
+    // body("ownerPhoneNo")
+    //     .trim()
+    //     .isNumeric()
+    //     .isLength({ min: 10 }),
+    // body("ownerCnic")
+    //     .trim()
+    //     .isNumeric()
+    //     .notEmpty(),
+    // body("area")
+    //     .notEmpty()
+    //     .trim()
+// ], 
+isAuth, shopController.addShop);
 
 router.get("/shop/:shopId", isAuth, shopController.getShop);
 
