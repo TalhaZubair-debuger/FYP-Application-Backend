@@ -8,8 +8,9 @@ require('dotenv').config();
 
 
 const MONGO_URI =
-    `mongodb+srv://talhazubairinfo:${process.env.DB_PASSWORD}@fyp-cluter.qauvmhw.mongodb.net/DistributionApp?retryWrites=true&w=majority`;
-const app = express();
+    // `mongodb+srv://talhazubairinfo:${process.env.DB_PASSWORD}@fyp-cluter.qauvmhw.mongodb.net/DistributionApp?retryWrites=true&w=majority`;
+"mongodb://127.0.0.1:27017/DistributionApp"
+    const app = express();
 
 app.use(bodyParser.json());
 
