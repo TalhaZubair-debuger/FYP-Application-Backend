@@ -51,13 +51,7 @@ exports.updateProduct = async (req, res, next) => {
     const productName = req.body.productName;
     const stockQuantity = req.body.stockQuantity;
     const price = req.body.price;
-    const user = req.body.user;//testing
-
-    if (!productName) {
-        const error = new Error("Cannot update product without product name provided");
-        error.status = 422;
-        throw error;
-    }
+    const user = req.userId;
     try {
         const product = await Product.findOne({ _id: productId, user: user });
         if (!product) {
@@ -85,8 +79,7 @@ exports.updateProduct = async (req, res, next) => {
 
 exports.getProduct = async (req, res, next) => {
     const productId = req.params.productId;
-    const user = req.body.user;//testing
-
+    const user = req.userId;
     try {
         const product = await Product.findOne({ _id: productId, user: user });
         if (!product) {
@@ -108,12 +101,12 @@ exports.getAllProducts = async (req, res, next) => {
 
     try {
         const products = await Product.find({ user: user });
-        if (!user) {
-            const error = new Error("No products found!");
-            error.statusCode = 404;
-            throw error;
+        if (products.length === 0) {
+            res.status(201).json({ message: "No Products found!" })
         }
-        res.status(201).json({ message: "Products found!", products: products })
+        else {
+            res.status(201).json({ message: "Products found!", products: products })
+        }
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -148,6 +141,24 @@ exports.updateStocks = async (req, res, next) => {
         }
         await product.save();
         res.status(200).json({ message: "Stock Updated!", stockQuantity: product.stockQuantity });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.deleteProduct = async (req, res, next) => {
+    const productId = req.params.productId;
+    try {
+        const response = await Product.findOneAndDelete({ _id: productId, user: req.userId });
+        if (!response) {
+            const error = new Error("No Product Found");
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({ message: "Product Deleted!" });
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

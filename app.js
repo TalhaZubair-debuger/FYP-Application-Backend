@@ -4,6 +4,7 @@ const shopAndAreasRoutes = require("./routes/shopAndAreas");
 const productRoutes = require("./routes/products");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const vendorRoutes = require("./routes/vendors");
 require('dotenv').config();
 
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 app.use("/user", authRoutes);
 app.use("/shops", shopAndAreasRoutes);
 app.use("/products", productRoutes);
+app.use("/vendors", vendorRoutes);
 
 
 mongoose.connect(MONGO_URI)

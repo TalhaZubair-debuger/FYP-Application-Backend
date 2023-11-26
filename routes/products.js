@@ -59,4 +59,6 @@ router.patch("/update-stocks/:productId", [
         .withMessage("The price should be non-Empty and in decimal values. Example: 10.00")
 ], isAuth, productController.updateStocks);
 
+router.delete("/delete-product/:productId", isAuth, productController.deleteProduct);
+
 module.exports = router;

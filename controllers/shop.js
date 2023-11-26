@@ -5,12 +5,12 @@ const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
 
 exports.addShop = async (req, res, next) => {
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //     const error = new Error("Validation Failed, data entered in wrong format.");
-    //     error.statusCode = 422;
-    //     throw error;
-    // }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error("Validation Failed, data entered in wrong format.");
+        error.statusCode = 422;
+        throw error;
+    }
     const shopName = req.body.shopName;
     const registration = req.body.registration;
     const ownerPhoneNo = req.body.ownerPhoneNo;
@@ -19,7 +19,6 @@ exports.addShop = async (req, res, next) => {
 
     console.log(req.userId);
     const user = await User.findById(
-        // req.body.user//testing Only
         req.userId
     );
     if (!user) {
@@ -27,7 +26,6 @@ exports.addShop = async (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
-    console.log(area + " and " + shopName);
     const userObj = new mongoose.Types.ObjectId(user);
     const savedAreas = await Area.findOne({ areaName: area, user: userObj });//testing
     if (!savedAreas) {
@@ -43,7 +41,6 @@ exports.addShop = async (req, res, next) => {
         ownerCnic: ownerCnic,
         area: area,
         user: req.userId
-        // user: req.body.user//testing Only
     })
 
     try {
@@ -75,11 +72,11 @@ exports.getShop = async (req, res, next) => {
 exports.getAllShops = async (req, res, next) => {
     const shop = await Shop.find({ user: req.userId });
     if (shop.length === 0) {
-        const error = new Error("No Shops Found!");
-        error.statusCode = 404;
-        throw error;
+        res.status(404).json({ message: "No Shops found" });
     }
-    res.status(200).json({ message: "Shops found", shops: shop });
+    else {
+        res.status(200).json({ message: "Shops found", shops: shop });
+    }
 }
 
 exports.updateShop = async (req, res, next) => {
