@@ -1,4 +1,4 @@
-const Vendor = require("../models/vendors");
+const Vendor = require("../../models/App/vendors");
 const { validationResult } = require("express-validator");
 
 exports.addVendor = async(req, res, next) => {

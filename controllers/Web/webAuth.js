@@ -1,9 +1,9 @@
-const User = require("../models/user");
+const Investor = require("../../models/Web/Investor");;
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken");
 
-exports.signup = async (req, res, next) => {
+exports.investorSignup = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error("Validation Failed.");
@@ -11,20 +11,17 @@ exports.signup = async (req, res, next) => {
         error.data = errors.array();
         throw error;
     }
+    const name = req.body.name;
+    const phoneNumber = req.body.phoneNumber;
     const email = req.body.email;
     const password = req.body.password;
-    const name = req.body.name;
-    const number = req.body.number;
-    const cnic = req.body.cnic;
-
     try {
         const hashedPassword = await bcrypt.hash(password, 12);
-        const user = new User({
+        const user = new Investor({
+            name: name,
+            phoneNumber: phoneNumber,
             email: email,
             password: hashedPassword,
-            name: name,
-            number: number,
-            cnic: cnic
         })
         const result = await user.save();
         res.status(201).json({ message: "User Created!", userId: result._id });
@@ -36,12 +33,12 @@ exports.signup = async (req, res, next) => {
     }
 }
 
-exports.login = async (req, res, next) => {
+exports.investorLogin = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     let loadedUser;
     try {
-        const user = await User.findOne({ email: email });
+        const user = await Investor.findOne({ email: email });
         if (!user) {
             const error = new Error("A user with this Email could not be found!");
             error.statusCode = 401;
@@ -59,7 +56,7 @@ exports.login = async (req, res, next) => {
                 email: loadedUser.email,
                 userId: loadedUser._id.toString()
             },
-            "realsupersecretshit",
+            "investorssupersecrettoken",
             { expiresIn: "5h" }
         )
         res.status(200).json({ token: token, userId: loadedUser._id.toString() })
@@ -71,10 +68,10 @@ exports.login = async (req, res, next) => {
     }
 }
 
-exports.getUserDetails = async(req, res, next) => {
+exports.getInvestorDetails = async(req, res, next) => {
     const userId = req.userId;
     try {
-        const user = await User.findOne({ _id: userId });
+        const user = await Investor.findOne({ _id: userId });
         if (!user) {
             res.status(201).json({ message: "No User Data found!" })
         }

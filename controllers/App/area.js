@@ -1,7 +1,7 @@
 const { validationResult } = require("express-validator");
-const Area = require("../models/area");
-const Shop = require("../models/shop");
-const User = require("../models/user");
+const Area = require("../../models/App/area");
+const Shop = require("../../models/App/shop");
+const User = require("../../models/App/user");
 
 exports.addArea = async (req, res, next) => {
     const errors = validationResult(req);

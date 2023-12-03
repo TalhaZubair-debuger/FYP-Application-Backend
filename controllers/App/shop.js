@@ -1,7 +1,7 @@
 const { validationResult } = require("express-validator");
-const Shop = require("../models/shop");
-const Area = require("../models/area");
-const User = require("../models/user");
+const Shop = require("../../models/App/shop");
+const Area = require("../../models/App/area");
+const User = require("../../models/App/user");
 const { default: mongoose } = require("mongoose");
 
 exports.addShop = async (req, res, next) => {

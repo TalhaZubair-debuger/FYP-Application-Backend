@@ -1,7 +1,7 @@
 const express = require("express");
-const isAuth = require("../middlewares/is-auth");
+const isAuth = require("../../middlewares/is-auth");
 const { body } = require("express-validator");
-const shopRecordsController = require("../controllers/shopRecords");
+const shopRecordsController = require("../../controllers/App/shopRecords");
 
 const router = express.Router();
 

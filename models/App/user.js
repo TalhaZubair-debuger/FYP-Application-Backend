@@ -43,6 +43,10 @@ const userSchema = Schema({
         type: Number,
         required: false,
         default: 0
+    },
+    investment: {
+        type: Boolean,
+        required: false
     }
 })
 

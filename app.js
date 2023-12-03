@@ -1,12 +1,14 @@
 const express = require("express");
-const authRoutes = require("./routes/auth");
-const shopAndAreasRoutes = require("./routes/shopAndAreas");
-const productRoutes = require("./routes/products");
+const authRoutes = require("./routes/App/auth");
+const shopAndAreasRoutes = require("./routes/App/shopAndAreas");
+const productRoutes = require("./routes/App/products");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const vendorRoutes = require("./routes/vendors");
-const shopRecordsRoutes = require("./routes/shopRecords");
-const vendorRecordsRoutes = require("./routes/vendorRecords");
+const vendorRoutes = require("./routes/App/vendors");
+const shopRecordsRoutes = require("./routes/App/shopRecords");
+const vendorRecordsRoutes = require("./routes/App/vendorRecords");
+const investorWebAuthRoutes = require("./routes/Web/webAuth");
+const contactUsRoutes = require("./routes/Web/contactUs");
 require('dotenv').config();
 
 
@@ -24,6 +26,7 @@ app.use((req, res, next) => {
     next();
 })
 
+//App Routes
 app.use("/user", authRoutes);
 app.use("/shops", shopAndAreasRoutes);
 app.use("/shop-records", shopRecordsRoutes);
@@ -31,6 +34,9 @@ app.use("/vendor-records", vendorRecordsRoutes);
 app.use("/products", productRoutes);
 app.use("/vendors", vendorRoutes);
 
+//Web Routes
+app.use('/website-user', investorWebAuthRoutes);
+app.use('/website', contactUsRoutes);
 
 mongoose.connect(MONGO_URI)
     .then(() => {

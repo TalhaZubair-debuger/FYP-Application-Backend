@@ -1,6 +1,6 @@
-const Shop = require("../models/shop");
-const ShopRecords = require("../models/shopRecords");
-const VendorRecords = require("../models/vendorRecords");
+const Shop = require("../models/App/shop");
+const ShopRecords = require("../models/App/shopRecords");
+const VendorRecords = require("../models/App/vendorRecords");
 
 exports.revenueCalculator = async (shopId) => {
     let totalRevenue = 0;

@@ -1,9 +1,9 @@
 const { validationResult } = require("express-validator");
-const ShopRecords = require("../models/shopRecords");
-const { DateNow } = require("../utils/date");
-const Product = require("../models/product");
-const { revenueCalculator } = require("../utils/revenueCalculator");
-const User = require("../models/user");
+const ShopRecords = require("../../models/App/shopRecords");
+const { DateNow } = require("../../utils/date");
+const Product = require("../../models/App/product");
+const { revenueCalculator } = require("../../utils/revenueCalculator");
+const User = require("../../models/App/user");
 
 exports.addShopRecords = async (req, res, next) => {
     const errors = validationResult(req);

@@ -1,8 +1,8 @@
 const { validationResult } = require("express-validator");
-const VendorRecords = require("../models/vendorRecords");
-const { vendorRevenueCalculator } = require("../utils/revenueCalculator");
-const Product = require("../models/product");
-const User = require("../models/user");
+const VendorRecords = require("../../models/App/vendorRecords");
+const { vendorRevenueCalculator } = require("../../utils/revenueCalculator");
+const Product = require("../../models/App/product");
+const User = require("../../models/App/user");
 
 exports.addVendorRecords = async (req, res, next) => {
     const errors = validationResult(req);
