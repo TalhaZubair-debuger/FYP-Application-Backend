@@ -79,6 +79,16 @@ exports.getAllShops = async (req, res, next) => {
     }
 }
 
+exports.getTopShops = async (req, res, next) => {
+    const shop = await Shop.find({ user: req.userId }).limit(3);
+    if (shop.length === 0) {
+        res.status(404).json({ message: "No Shops found" });
+    }
+    else {
+        res.status(200).json({ message: "Shops found", shops: shop });
+    }
+}
+
 exports.updateShop = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -38,6 +38,11 @@ const userSchema = Schema({
     role: {
         type: String,
         required: false
+    },
+    currentTotalStock: {
+        type: Number,
+        required: false,
+        default: 0
     }
 })
 

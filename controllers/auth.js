@@ -60,11 +60,29 @@ exports.login = async (req, res, next) => {
                 userId: loadedUser._id.toString()
             },
             "realsupersecretshit",
-            { expiresIn: "1h" }
+            { expiresIn: "5h" }
         )
         res.status(200).json({ token: token, userId: loadedUser._id.toString() })
     } catch (error) {
-        if (!error.statusCode){
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.getUserDetails = async(req, res, next) => {
+    const userId = req.userId;
+    try {
+        const user = await User.findOne({ _id: userId });
+        if (!user) {
+            res.status(201).json({ message: "No User Data found!" })
+        }
+        else {
+            res.status(201).json({ message: "User found!", user: user })
+        }
+    } catch (error) {
+        if (!error.statusCode) {
             error.statusCode = 500;
         }
         next(error);

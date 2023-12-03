@@ -32,7 +32,10 @@ const shopSchema = new Schema({
         type: String,
         required: false
     },
-
+    revenue: {
+        type: Number,
+        required: false
+    },
 },
     { timestamps: true }
 )

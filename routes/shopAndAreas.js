@@ -34,6 +34,8 @@ router.get("/shop/:shopId", isAuth, shopController.getShop);
 
 router.get("/shop", isAuth, shopController.getAllShops);
 
+router.get("/top-shops", isAuth, shopController.getTopShops);
+
 router.patch("/edit-shop/:shopId", [
     body("shopName")
         .trim()

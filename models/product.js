@@ -12,7 +12,7 @@ const productSchema = Schema({
     },
     stockQuantity: {
         type: String,
-        required: true
+        required: false
     },
     price: {
         type: String,
@@ -23,6 +23,10 @@ const productSchema = Schema({
         ref: "User",
         required: true
     },
+    revenue: {
+        type: Array,
+        required: false
+    }
 }, {
     timestamps: true
 })

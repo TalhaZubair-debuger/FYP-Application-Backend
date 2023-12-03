@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Area = require("../models/area");
 const Shop = require("../models/shop");
+const User = require("../models/user");
 
 exports.addArea = async (req, res, next) => {
     const errors = validationResult(req);
@@ -24,9 +25,16 @@ exports.addArea = async (req, res, next) => {
             areaName: areaName,
             areaCode: areaCode,
             user: req.userId
-            // user: req.body.user
         })
-        await area.save();
+        const response = await area.save();
+        const user = await User.findById(req.userId);
+        if(!user){
+            const error = new Error("User not found!");
+            error.statusCode = 404;
+            throw error;
+        }
+        user.areas.push(response._id);
+        await user.save();
         res.status(201).json({ message: "Area Created Successfully!", userId: req.userId })
     } catch (error) {
         if (!error.statusCode) {

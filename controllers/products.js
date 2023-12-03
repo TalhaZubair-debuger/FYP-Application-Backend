@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Product = require("../models/product");
+const User = require("../models/user");
 
 exports.addProduct = async (req, res, next) => {
     const errors = validationResult(req);
@@ -12,7 +13,6 @@ exports.addProduct = async (req, res, next) => {
     const productId = req.body.productId;
     const productName = req.body.productName;
     const price = req.body.price;
-    const stockQuantity = req.body.stockQuantity;
     const user = req.userId;
 
     try {
@@ -26,7 +26,6 @@ exports.addProduct = async (req, res, next) => {
             productId: productId,
             productName: productName,
             price: price,
-            stockQuantity: stockQuantity,
             user: user
         })
         await product.save();
@@ -66,6 +65,9 @@ exports.updateProduct = async (req, res, next) => {
         }
         if (stockQuantity !== null) {
             product.stockQuantity = stockQuantity;
+            const user = await User.findById(req.userId);
+            user.currentTotalStock += parseInt(stockQuantity);
+            await user.save();
         }
         await product.save();
         res.status(200).json({ message: "Product updated successfully!", product: product });
@@ -115,6 +117,42 @@ exports.getAllProducts = async (req, res, next) => {
     }
 }
 
+exports.getTopProducts = async (req, res, next) => {
+    const user = req.userId;
+    try {
+        const products = await Product.find({ user: user }).limit(3);
+        if (products.length === 0) {
+            res.status(201).json({ message: "No Products found!" })
+        }
+        else {
+            res.status(201).json({ message: "Products found!", products: products })
+        }
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.getLowStockProducts = async (req, res, next) => {
+    const user = req.userId;
+    try {
+        const products = await Product.find({ user: user, $expr: { $lt: [{ $toInt: "$stockQuantity" }, 100] } });
+        if (products.length === 0) {
+            res.status(201).json({ message: "No Products found!" })
+        }
+        else {
+            res.status(201).json({ message: "Low Stock Products found!", products: products })
+        }
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
 exports.updateStocks = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -123,23 +161,20 @@ exports.updateStocks = async (req, res, next) => {
         throw error;
     }
 
-    const productId = req.params.productId;
+    const productName = req.body.productName;
     const stockQuantity = req.body.stockQuantity;
-    const price = req.body.price;
-    const user = req.body.user;//testing
-
     try {
-        const product = await Product.findOne({ _id: productId, user: user });
+        const product = await Product.findOne({ productName: productName, user: req.userId });
         if (!product) {
             const error = new Error("No product found!");
             error.statusCode = 404;
             throw error;
         }
         product.stockQuantity = stockQuantity;
-        if (price !== null) {
-            product.price = price;
-        }
         await product.save();
+        const user = await User.findById(req.userId);
+        user.currentTotalStock += parseInt(stockQuantity);
+        user.save();
         res.status(200).json({ message: "Stock Updated!", stockQuantity: product.stockQuantity });
     } catch (error) {
         if (!error.statusCode) {

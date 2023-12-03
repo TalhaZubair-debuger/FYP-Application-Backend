@@ -5,13 +5,15 @@ const productRoutes = require("./routes/products");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const vendorRoutes = require("./routes/vendors");
+const shopRecordsRoutes = require("./routes/shopRecords");
+const vendorRecordsRoutes = require("./routes/vendorRecords");
 require('dotenv').config();
 
 
 const MONGO_URI =
     // `mongodb+srv://talhazubairinfo:${process.env.DB_PASSWORD}@fyp-cluter.qauvmhw.mongodb.net/DistributionApp?retryWrites=true&w=majority`;
-"mongodb://127.0.0.1:27017/DistributionApp"
-    const app = express();
+    "mongodb://127.0.0.1:27017/DistributionApp";
+const app = express();
 
 app.use(bodyParser.json());
 
@@ -24,6 +26,8 @@ app.use((req, res, next) => {
 
 app.use("/user", authRoutes);
 app.use("/shops", shopAndAreasRoutes);
+app.use("/shop-records", shopRecordsRoutes);
+app.use("/vendor-records", vendorRecordsRoutes);
 app.use("/products", productRoutes);
 app.use("/vendors", vendorRoutes);
 
