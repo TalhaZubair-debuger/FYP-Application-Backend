@@ -21,7 +21,7 @@ const vendorSchema = new Schema({
         required: true
     },
     records: {
-        type: String,
+        type: Array,
         required: false
     },
 },
