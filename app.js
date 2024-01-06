@@ -9,6 +9,7 @@ const shopRecordsRoutes = require("./routes/App/shopRecords");
 const vendorRecordsRoutes = require("./routes/App/vendorRecords");
 const investorWebAuthRoutes = require("./routes/Web/webAuth");
 const contactUsRoutes = require("./routes/Web/contactUs");
+const employeesRoutes = require("./routes/App/employee");
 require('dotenv').config();
 
 
@@ -33,7 +34,7 @@ app.use("/shop-records", shopRecordsRoutes);
 app.use("/vendor-records", vendorRecordsRoutes);
 app.use("/products", productRoutes);
 app.use("/vendors", vendorRoutes);
-
+app.use("/employees", employeesRoutes);
 //Web Routes
 app.use('/website-user', investorWebAuthRoutes);
 app.use('/website', contactUsRoutes);

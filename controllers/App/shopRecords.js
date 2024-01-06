@@ -46,7 +46,6 @@ exports.addShopRecords = async (req, res, next) => {
                         shopId,
                         userId: req.userId
                     })
-                    console.log("4");
                     await newShopRecord.save();
                 } else {
                     shopRecord.records.push({
@@ -61,15 +60,16 @@ exports.addShopRecords = async (req, res, next) => {
                 }
 
                 const records = await revenueCalculator(shopId);
+
                 productExist.stockQuantity = productExist.stockQuantity - quantity;
                 await productExist.save();
 
                 const userStockUpdate = await User.findById(req.userId);
                 userStockUpdate.currentTotalStock -= quantity;
                 const checkUserStockUpdate = await userStockUpdate.save();
-                if (checkUserStockUpdate){
+                if (checkUserStockUpdate) {
                     res.status(200).json({ message: "Record Saved!", records: records });
-                }else {
+                } else {
                     res.status(200).json({ message: "Error in updating stocks for the user" });
                 }
 
@@ -97,8 +97,9 @@ exports.addShopRecords = async (req, res, next) => {
                             recieved//Ok
                         })
                         const result = await shopRecord.save();
-                        const records = await revenueCalculator(shopId);
-                        if (result){
+                        
+                        if (result) {
+                            const records = await revenueCalculator(shopId);
                             res.status(200).json({ message: "Record Saved!", records: records });
                         }
                     }

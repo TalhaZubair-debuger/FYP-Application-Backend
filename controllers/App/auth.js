@@ -2,6 +2,7 @@ const User = require("../../models/App/user");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken");
+const Employee = require("../../models/App/employee");
 
 exports.signup = async (req, res, next) => {
     const errors = validationResult(req);
@@ -18,6 +19,18 @@ exports.signup = async (req, res, next) => {
     const cnic = req.body.cnic;
 
     try {
+        const checkUserExist = await User.findOne({ email });
+        if (checkUserExist != null) {
+            res.status(422).json({ message: "Email Already Exists!" })
+            return;
+        }
+        
+        const checkEmployeeExist = await Employee.findOne({ email });
+        if (checkEmployeeExist != null) {
+            res.status(422).json({ message: "Email Already Exists!" })
+            return;
+        }
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new User({
             email: email,
@@ -39,15 +52,35 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    let loadedUser;
     try {
         const user = await User.findOne({ email: email });
         if (!user) {
-            const error = new Error("A user with this Email could not be found!");
-            error.statusCode = 401;
-            throw error;
+
+            const employee = await Employee.findOne({ email });
+            if (!employee) {
+                const error = new Error("A user with this Email could not be found!");
+                error.statusCode = 401;
+                throw error;
+            }
+            const isEqual = await bcrypt.compare(password, employee.password);
+            if (!isEqual) {
+                const error = new Error("Wrong Password!");
+                error.statusCode = 401;
+                throw error;
+            }
+            const token = jwt.sign(
+                {
+                    email: employee.email,
+                    userId: employee.employer.toString()
+                },
+                "realsupersecretshit",
+                { expiresIn: "5h" }
+            )
+            res.status(200)
+            .json({ token: token, userId: employee.employer.toString(), employer: employee.employer, 
+                employeeDesignation: employee.designation })
+            return;
         }
-        loadedUser = user;
         const isEqual = await bcrypt.compare(password, user.password);
         if (!isEqual) {
             const error = new Error("Wrong Password!");
@@ -56,13 +89,13 @@ exports.login = async (req, res, next) => {
         }
         const token = jwt.sign(
             {
-                email: loadedUser.email,
-                userId: loadedUser._id.toString()
+                email: user.email,
+                userId: user._id.toString()
             },
             "realsupersecretshit",
             { expiresIn: "5h" }
         )
-        res.status(200).json({ token: token, userId: loadedUser._id.toString() })
+        res.status(200).json({ token: token, userId: user._id.toString() })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -71,7 +104,7 @@ exports.login = async (req, res, next) => {
     }
 }
 
-exports.getUserDetails = async(req, res, next) => {
+exports.getUserDetails = async (req, res, next) => {
     const userId = req.userId;
     try {
         const user = await User.findOne({ _id: userId });

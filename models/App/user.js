@@ -47,6 +47,10 @@ const userSchema = Schema({
     investment: {
         type: Boolean,
         required: false
+    },
+    employees: {
+        type: Array,
+        required: false
     }
 })
 

@@ -5,11 +5,13 @@ const VendorRecords = require("../models/App/vendorRecords");
 exports.revenueCalculator = async (shopId) => {
     let totalRevenue = 0;
     let totalSent = 0;
-    const record = await ShopRecords.findById(shopId);
+    const record = await ShopRecords.findOne({shopId});
+    record.records ?
     record.records.map(item => {
         totalRevenue += item.youGot ? item.youGot : 0;
         totalSent += item.youGave ? item.youGave : 0;
     })
+    : null;
     const balance = totalRevenue - totalSent;
 
     record.totalRevenue = totalRevenue;
@@ -20,7 +22,6 @@ exports.revenueCalculator = async (shopId) => {
     shop.revenue = totalRevenue;
     await shop.save();
     return record;
-
 }
 
 exports.vendorRevenueCalculator = async (vendorId) => {

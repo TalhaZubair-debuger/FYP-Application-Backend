@@ -9,11 +9,9 @@ router.post("/add-contact-message", [
         .trim(),
     body("subject")
         .notEmpty()
-        .isAlphanumeric()
         .trim(),
     body("message")
         .notEmpty()
-        .isAlphanumeric()
         .trim()
 ], contactUsController.addNewContactMessage);
 
