@@ -27,14 +27,14 @@ exports.revenueCalculator = async (shopId) => {
 exports.vendorRevenueCalculator = async (vendorId) => {
     let totalOrders = 0;
     let totalSent = 0;
-    const record = await VendorRecords.findById(vendorId);
+    const record = await VendorRecords.findOne({vendorId});
     record.records.map(item => {
         totalOrders += item.youGot ? item.youGot : 0;
         totalSent += item.youGave ? item.youGave : 0;
     })
     const balance = totalOrders - totalSent;
     record.totalOrders = totalOrders;
-    record.totalSent = totalSent;
+    record.totalSent = totalSent;//Rs.
     record.balance = balance;
     await record.save();
     return record;

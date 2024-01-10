@@ -44,4 +44,6 @@ router.post("/login", [
 
 router.get("/get-user", isAuth, authController.getUserDetails);
 
+router.post("/get-investment", isAuth, authController.postGetInvestment);
+
 module.exports = router;

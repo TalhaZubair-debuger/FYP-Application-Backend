@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken");
 const Employee = require("../../models/App/employee");
+const ShopRecords = require("../../models/App/shopRecords");
 
 exports.signup = async (req, res, next) => {
     const errors = validationResult(req);
@@ -24,7 +25,7 @@ exports.signup = async (req, res, next) => {
             res.status(422).json({ message: "Email Already Exists!" })
             return;
         }
-        
+
         const checkEmployeeExist = await Employee.findOne({ email });
         if (checkEmployeeExist != null) {
             res.status(422).json({ message: "Email Already Exists!" })
@@ -77,8 +78,10 @@ exports.login = async (req, res, next) => {
                 { expiresIn: "5h" }
             )
             res.status(200)
-            .json({ token: token, userId: employee.employer.toString(), employer: employee.employer, 
-                employeeDesignation: employee.designation })
+                .json({
+                    token: token, userId: employee.employer.toString(), employer: employee.employer,
+                    employeeDesignation: employee.designation
+                })
             return;
         }
         const isEqual = await bcrypt.compare(password, user.password);
@@ -106,12 +109,29 @@ exports.login = async (req, res, next) => {
 
 exports.getUserDetails = async (req, res, next) => {
     const userId = req.userId;
+    const dueDate = new Date() + 1;
+    let revenue = 0;
     try {
-        const user = await User.findOne({ _id: userId });
+        const user = await User.findById(userId);
         if (!user) {
             res.status(201).json({ message: "No User Data found!" })
         }
         else {
+            const newDate = new Date();
+            if (user.dueCalculation < newDate || user.dueCalculation == null) {
+                const shopRecords = await ShopRecords.find({ userId });
+                if (!shopRecords) {
+                    res.status(201).json({ message: "User found!", user: user })
+                    return;
+                }
+                shopRecords.map(item => {
+                    revenue += item.totalRevenue;
+                })
+                user.totalRevenue = revenue;
+                user.dueCalculation = dueDate;
+
+                await user.save();
+            }
             res.status(201).json({ message: "User found!", user: user })
         }
     } catch (error) {
@@ -121,3 +141,29 @@ exports.getUserDetails = async (req, res, next) => {
         next(error);
     }
 }
+
+exports.postGetInvestment = async (req, res, next) => {
+    const investorEmail = req.body.investorEmail;
+    const amount = req.body.amount;
+    const equity = req.body.equity;
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        user.investorEmail = investorEmail;
+        user.amount = amount;
+        user.equity = equity;
+
+        await user.save();
+
+        res.status(200).json({ message: "Investment information saved!" });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+

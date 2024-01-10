@@ -10,6 +10,7 @@ const vendorRecordsRoutes = require("./routes/App/vendorRecords");
 const investorWebAuthRoutes = require("./routes/Web/webAuth");
 const contactUsRoutes = require("./routes/Web/contactUs");
 const employeesRoutes = require("./routes/App/employee");
+const cors = require("cors");
 require('dotenv').config();
 
 
@@ -19,6 +20,7 @@ const MONGO_URI =
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");

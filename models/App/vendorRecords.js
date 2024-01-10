@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const records = new Schema({
     quantity: String,
-    producName: String,
+    productName: String,
+    description: String,
     youGave: Number,
     youGot: Number,
     sent: Boolean,

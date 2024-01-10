@@ -51,7 +51,27 @@ const userSchema = Schema({
     employees: {
         type: Array,
         required: false
-    }
+    },
+    investorEmail: {
+        type: String,
+        required: false
+    },
+    amount: {
+        type: String,
+        required: false
+    },
+    equity: {
+        type: String,
+        required: false
+    },
+    totalRevenue: {
+        type: String,
+        required: false
+    },
+    dueCalculation: {
+        type: String,
+        required: false
+    },
 })
 
 module.exports = mongoose.model("User", userSchema);
