@@ -72,6 +72,18 @@ const userSchema = Schema({
         type: String,
         required: false
     },
+    gotInvestment: {
+        type: Boolean,
+        required: false
+    },
+    yourRevenue: {
+        type: String,
+        required: false
+    },
+    currentHoldings: {
+        type: String,
+        required: false
+    }
 })
 
 module.exports = mongoose.model("User", userSchema);
