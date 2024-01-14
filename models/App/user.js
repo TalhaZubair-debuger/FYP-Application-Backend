@@ -83,7 +83,27 @@ const userSchema = Schema({
     currentHoldings: {
         type: String,
         required: false
-    }
+    },
+    tagline: {
+        type: String,
+        required: false
+    },
+    image: {
+        type: String,
+        required: false
+    },
+    companyName: {
+        type: String,
+        required: false
+    },
+    stripePublishableKey: {
+        type: String,
+        required: false
+    },
+    stripePrivateKey: {
+        type: String,
+        required: false
+    },
 })
 
 module.exports = mongoose.model("User", userSchema);

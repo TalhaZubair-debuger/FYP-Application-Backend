@@ -19,7 +19,7 @@ const MONGO_URI =
     "mongodb://127.0.0.1:27017/DistributionApp";
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '7mb' }));
 app.use(cors());
 
 app.use((req, res, next) => {

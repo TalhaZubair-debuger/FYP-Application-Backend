@@ -46,4 +46,8 @@ router.get("/get-user", isAuth, authController.getUserDetails);
 
 router.post("/get-investment", isAuth, authController.postGetInvestment);
 
+router.get("/get-distributors-need-investment", authController.getDistributorsNeedInvestment);
+
+router.post("/handle-investor-payment/:userId", isAuth, authController.postHandleInvestorPayment);
+
 module.exports = router;

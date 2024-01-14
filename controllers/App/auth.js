@@ -4,6 +4,8 @@ const { validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken");
 const Employee = require("../../models/App/employee");
 const ShopRecords = require("../../models/App/shopRecords");
+const Product = require("../../models/App/product");
+const Investor = require("../../models/Web/Investor");
 
 exports.signup = async (req, res, next) => {
     const errors = validationResult(req);
@@ -146,6 +148,12 @@ exports.postGetInvestment = async (req, res, next) => {
     const investorEmail = req.body.investorEmail;
     const amount = req.body.amount;
     const equity = req.body.equity;
+    const tagline = req.body.tagline;
+    const image = req.body.image;
+    const companyName = req.body.companyName;
+    const stripePublishableKey = req.body.stripePublishableKey;
+    const stripePrivateKey = req.body.stripePrivateKey;
+
     try {
         const user = await User.findById(req.userId);
         if (!user) {
@@ -155,6 +163,11 @@ exports.postGetInvestment = async (req, res, next) => {
         user.investorEmail = investorEmail;
         user.amount = amount;
         user.equity = equity;
+        user.tagline = tagline;
+        user.image = image;
+        user.companyName = companyName;
+        user.stripePublishableKey = stripePublishableKey;
+        user.stripePrivateKey = stripePrivateKey;
 
         await user.save();
 
@@ -167,3 +180,51 @@ exports.postGetInvestment = async (req, res, next) => {
     }
 }
 
+exports.getDistributorsNeedInvestment = async (req, res, next) => {
+    try {
+        const users = await User.find({ gotInvestment: true });
+        if (!users) {
+            res.status(404).json({ message: "No Distributors found!" });
+        }
+        const productsPromises = users.map(async (item) => {
+            const products = await Product.find({ user: item._id });
+            return { user: item, products };
+        });
+
+        const distributorsWithProducts = await Promise.all(productsPromises);
+
+        res.status(200).json({ distributorsWithProducts });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.postHandleInvestorPayment = async (req, res, next) => {
+    const userId = req.params.userId;
+    const investorId = req.userId;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: "Couldn't proceed payment!" });
+            return;
+        }
+        user.gotInvestment = true;
+        await user.save();
+        const investor = await Investor.findById(investorId);
+        if (!investor) {
+            res.status(409).json({ message: "Investor is not authorized!" });
+            return;
+        }
+        investor.investedIn.push(user._id);
+        await investor.save()
+        res.status(200).json({ message: "Payment Succeeded!" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}

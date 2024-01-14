@@ -19,6 +19,12 @@ const investorSchema = Schema({
         type: String,
         required: true
     },
+    investedIn: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ]
 })
 
 module.exports = mongoose.model("Investor", investorSchema);
