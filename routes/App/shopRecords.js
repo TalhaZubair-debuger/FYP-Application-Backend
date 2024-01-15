@@ -9,4 +9,6 @@ router.post("/add-records/:shopId", isAuth, shopRecordsController.addShopRecords
 
 router.get("/get-records/:shopId", isAuth, shopRecordsController.getRecords);
 
+router.get("/get-monthly-records/:shopId", isAuth, shopRecordsController.getShopMonthlyRevenue);
+
 module.exports = router;

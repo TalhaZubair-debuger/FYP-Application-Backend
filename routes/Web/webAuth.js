@@ -49,4 +49,10 @@ router.post("/investor-login", [
 
 router.get("/get-investor", isAuth, webAuthController.getInvestorDetails);
 
+router.get("/get-investor-dashboard", isAuth, webAuthController.getInvestorDashboardDetails);
+
+router.post("/generate-payment-request/:userId", isAuth, webAuthController.generatePaymentRequestForDistributor);
+
+router.get("/get-payment-requests", isAuth, webAuthController.getPaymentRequests);
+
 module.exports = router;

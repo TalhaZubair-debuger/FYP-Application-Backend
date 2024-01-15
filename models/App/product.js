@@ -29,17 +29,9 @@ const productSchema = Schema({
     },
     
     totalRevenue: {
-        type: String,
+        type: Number,
         required: false
     },
-    purchasePrice: {
-        type: String,
-        required: false
-    },
-    sellingPrice: {
-        type: String,
-        required: false
-    }
 }, {
     timestamps: true
 })

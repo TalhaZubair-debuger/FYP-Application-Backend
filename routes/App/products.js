@@ -2,6 +2,7 @@ const express = require("express");
 const isAuth = require("../../middlewares/is-auth");
 const productController = require("../../controllers/App/products");
 const { body } = require("express-validator");
+const { calculateProductRevenueOnUserLogin } = require("../../utils/revenueCalculator");
 
 
 const router = express.Router();
@@ -56,5 +57,7 @@ router.post("/update-stocks", [
 ], isAuth, productController.updateStocks);
 
 router.delete("/delete-product/:productId", isAuth, productController.deleteProduct);
+
+router.get("/update-product-revenue", isAuth, productController.getCalculateRevenue);
 
 module.exports = router;

@@ -22,6 +22,9 @@ exports.addShopRecords = async (req, res, next) => {
     const youGot = req.body.youGot != null ? req.body.youGot : null;
     const sent = req.body.sent ? req.body.sent : false;
     const recieved = req.body.recieved ? req.body.recieved : false;
+    const transactionId = req.body.transactionId ? req.body.transactionId : null;
+    const date = new Date();
+    const month = date.getMonth();
 
     try {
         const shopRecord = await ShopRecords.findOne({ userId: req.userId, shopId: shopId });
@@ -31,6 +34,10 @@ exports.addShopRecords = async (req, res, next) => {
                 $expr: { $gt: [{ $toInt: "$stockQuantity" }, quantity - 1] },
                 productName
             })
+            if (productExist.price === "0") {
+                res.status(201).json({ message: "Product Price is not provided after purchase from vendor" });
+                return;
+            }
             if (productExist) {
                 if (!shopRecord) {
                     //Shop Record here
@@ -41,7 +48,10 @@ exports.addShopRecords = async (req, res, next) => {
                             youGave,
                             youGot,
                             sent,
-                            recieved
+                            recieved,
+                            date,
+                            month,
+                            transactionId
                         },
                         shopId,
                         userId: req.userId
@@ -54,7 +64,10 @@ exports.addShopRecords = async (req, res, next) => {
                         youGave,
                         youGot,
                         sent,
-                        recieved
+                        recieved,
+                        date,
+                        month,
+                        transactionId
                     })
                     await shopRecord.save();
                 }
@@ -62,6 +75,15 @@ exports.addShopRecords = async (req, res, next) => {
                 const records = await revenueCalculator(shopId);
 
                 productExist.stockQuantity = productExist.stockQuantity - quantity;
+                productExist.revenue.push({
+                    youGave,
+                    youGot,
+                    date,
+                    month
+                })
+                if (youGot !== null) {
+                    productExist.totalRevenue = parseInt(productExist.totalRevenue) + parseInt(youGot);
+                }
                 await productExist.save();
 
                 const userStockUpdate = await User.findById(req.userId);
@@ -80,6 +102,12 @@ exports.addShopRecords = async (req, res, next) => {
         }
         else {
             const product = await Product.findOne({ productName, user: req.userId });
+
+            const productExist = await Product.findOne({
+                user: req.userId,
+                productName
+            })
+
             if (product) {
                 if (!shopRecord) {
                     res.status(404).json({
@@ -94,10 +122,22 @@ exports.addShopRecords = async (req, res, next) => {
                             youGave,
                             youGot,//Ok
                             sent,
-                            recieved//Ok
+                            recieved,//Ok
+                            date,
+                            month,
+                            transactionId
                         })
+
+                        productExist.revenue.push({
+                            youGave,
+                            youGot,
+                            date,
+                            month
+                        })
+                        await productExist.save();
+
                         const result = await shopRecord.save();
-                        
+
                         if (result) {
                             const records = await revenueCalculator(shopId);
                             res.status(200).json({ message: "Record Saved!", records: records });
@@ -137,6 +177,31 @@ exports.getRecords = async (req, res, next) => {
         else {
             res.status(201).json({ records: shopRecords })
         }
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.getShopMonthlyRevenue = async(req, res, next) => {
+    const shopId = req.params.shopId;
+
+    try {
+        console.log(shopId);
+        const shopRecords = await ShopRecords.findOne({shopId});
+        if (!shopRecords){
+            res.status(404).json("Error finding shop records");
+        return;
+        }
+
+        const Jan = shopRecords.records.filter(item => item.month === "0");
+        const Feb = shopRecords.records.filter(item => item.month === "0");
+        console.log(Jan);
+
+
+        res.status(200);
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

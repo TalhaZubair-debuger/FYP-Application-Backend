@@ -20,6 +20,9 @@ exports.addVendorRecords = async (req, res, next) => {
     const youGot = req.body.youGot != null ? req.body.youGot : null;
     const sent = req.body.sent ? req.body.sent : false;
     const recieved = req.body.recieved ? req.body.recieved : false;
+    const transactionId = req.body.transactionId ? req.body.transactionId : null;
+    const date = new Date();
+    const month = date.getMonth();
 
     try {
         const vendorRecord = await VendorRecords.findOne({ userId: req.userId, vendorId: vendorId });
@@ -31,7 +34,10 @@ exports.addVendorRecords = async (req, res, next) => {
                         youGave,
                         youGot,
                         sent,
-                        recieved
+                        recieved,
+                        date,
+                        month,
+                        transactionId
                     },
                     vendorId: vendorId,
                     userId: req.userId
@@ -44,21 +50,24 @@ exports.addVendorRecords = async (req, res, next) => {
                     youGave,
                     youGot,
                     sent,
-                    recieved
+                    recieved,
+                    date,
+                    month,
+                    transactionId
                 })
                 await vendorRecord.save();
             }
 
             const existingProduct = await Product.findOne({ productName });
             if (existingProduct) {
-                existingProduct.stockQuantity += quantity;
+                existingProduct.stockQuantity = parseInt(existingProduct.stockQuantity) + parseInt(quantity);
                 await existingProduct.save();
             }
             else {
                 const newProduct = new Product({
                     productId: new Date().toString(),
-                    description,
-                    stockQuantity: quantity,
+                    productName,
+                    stockQuantity: quantity !== null ? quantity : 0 ,
                     price: 0,
                     user: req.userId
                 });
@@ -71,7 +80,7 @@ exports.addVendorRecords = async (req, res, next) => {
             }
             const checkUserStockUpdate = await userStockUpdate.save();
             if (checkUserStockUpdate){
-                // const records = await vendorRevenueCalculator(vendorId);
+                const records = await vendorRevenueCalculator(vendorId);
                 res.status(200).json({message: "Vendor Record saved!"});
             }
     } catch (error) {

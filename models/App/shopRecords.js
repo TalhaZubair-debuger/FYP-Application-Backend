@@ -8,7 +8,18 @@ const records = new Schema({
     youGave: Number,
     youGot: Number,
     sent: Boolean,
-    recieved: Boolean
+    recieved: Boolean,
+    date: String,
+    month: String,
+    transactionId: {
+        type: String,
+        required: false
+    }
+})
+const monthlyRecord = new Schema({
+    date: String,
+    month: String,
+    revenue: Number
 })
 
 const shopRecordsSchema = new Schema({
@@ -25,6 +36,7 @@ const shopRecordsSchema = new Schema({
         required: false
     },
     records: [records],
+    monthlyRecords: [monthlyRecord],
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",

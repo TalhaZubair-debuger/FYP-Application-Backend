@@ -2,6 +2,7 @@ const Investor = require("../../models/Web/Investor");;
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken");
+const User = require("../../models/App/user");
 
 exports.investorSignup = async (req, res, next) => {
     const errors = validationResult(req);
@@ -68,7 +69,7 @@ exports.investorLogin = async (req, res, next) => {
     }
 }
 
-exports.getInvestorDetails = async(req, res, next) => {
+exports.getInvestorDetails = async (req, res, next) => {
     const userId = req.userId;
     try {
         const user = await Investor.findOne({ _id: userId });
@@ -85,3 +86,69 @@ exports.getInvestorDetails = async(req, res, next) => {
         next(error);
     }
 }
+
+exports.getInvestorDashboardDetails = async (req, res, next) => {
+    const userId = req.userId;
+
+    try {
+        const investor = await Investor.findById(userId);
+        if (!investor) {
+            res.status(200).json({ message: "User not found!" });
+            return;
+        }
+
+        const productsPromises = investor.investedIn.map(async (item) => {
+            const user = await User.find({ _id: item._id });
+            return { user, investor };
+        });
+
+        const dataPromises = await Promise.all(productsPromises);
+
+        res.status(200).json({ dataPromises });
+
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.generatePaymentRequestForDistributor = async (req, res, next) => {
+    const userId = req.params.userId;
+    try {
+        const distributor = await User.findById(userId);
+        if (!distributor) {
+            res.status(404).json({ message: "Couldn't find distributor!" });
+            return;
+        }
+        distributor.paymentRequests.push({ userId: req.userId });
+
+        await distributor.save();
+        res.status(200).json({ message: "Request Sent!" });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.getPaymentRequests = async (req, res, next) => {
+    const userId = req.userId;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: "User not found!" });
+            return;
+        }
+        const investors = await Investor.find()
+        res.status(200).json({ investors });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+

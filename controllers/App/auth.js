@@ -182,7 +182,7 @@ exports.postGetInvestment = async (req, res, next) => {
 
 exports.getDistributorsNeedInvestment = async (req, res, next) => {
     try {
-        const users = await User.find({ gotInvestment: true });
+        const users = await User.find({ gotInvestment: false });
         if (!users) {
             res.status(404).json({ message: "No Distributors found!" });
         }

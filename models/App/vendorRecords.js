@@ -9,7 +9,13 @@ const records = new Schema({
     youGave: Number,
     youGot: Number,
     sent: Boolean,
-    recieved: Boolean
+    recieved: Boolean,
+    date: String,
+    month: String,
+    transactionId: {
+        type: String,
+        required: false
+    }
 })
 
 const vendorRecordsSchema = new Schema({

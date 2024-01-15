@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Product = require("../../models/App/product");
 const User = require("../../models/App/user");
+const { calculateProductRevenueOnUserLogin } = require("../../utils/revenueCalculator");
 
 exports.addProduct = async (req, res, next) => {
     const errors = validationResult(req);
@@ -199,5 +200,24 @@ exports.deleteProduct = async (req, res, next) => {
             error.statusCode = 500;
         }
         next(error);
+    }
+}
+
+exports.getCalculateRevenue = async (req, res, next) => {
+    const user = req.userId;
+
+    try {
+        const response = await calculateProductRevenueOnUserLogin(user);
+        if (response !== null){
+            res.status(201);
+        }
+        else{
+            res.status(500).json({message: "Product revenue calculation problem"});
+        }
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);       
     }
 }

@@ -104,6 +104,7 @@ const userSchema = Schema({
         type: String,
         required: false
     },
+    paymentRequests: []
 })
 
 module.exports = mongoose.model("User", userSchema);
