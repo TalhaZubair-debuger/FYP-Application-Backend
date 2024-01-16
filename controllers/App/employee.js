@@ -5,12 +5,6 @@ const { validationResult } = require("express-validator");
 
 
 exports.postAddEmployee = async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        const error = new Error("Validation Failed, data entered in wrong format.");
-        error.statusCode = 422;
-        throw error;
-    }
 
     const name = req.body.name;
     const contact = req.body.contact;
