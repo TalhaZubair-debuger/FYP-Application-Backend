@@ -16,11 +16,11 @@ const userSchema = Schema({
         required: true
     },
     number: {
-        type: String,
+        type: Number,
         required: true
     },
     cnic: {
-        type: String,
+        type: Number,
         required: true
     },
     shops: [
