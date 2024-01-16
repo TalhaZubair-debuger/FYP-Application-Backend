@@ -77,7 +77,7 @@ exports.addShopRecords = async (req, res, next) => {
                 productExist.stockQuantity = productExist.stockQuantity - quantity;
                 productExist.revenue.push({
                     youGave,
-                    youGot,
+                    youGot: parseInt(youGot),
                     date,
                     month
                 })
@@ -130,7 +130,7 @@ exports.addShopRecords = async (req, res, next) => {
 
                         productExist.revenue.push({
                             youGave,
-                            youGot,
+                            youGot: parseInt(youGot),
                             date,
                             month
                         })
@@ -185,27 +185,125 @@ exports.getRecords = async (req, res, next) => {
     }
 }
 
-exports.getShopMonthlyRevenue = async(req, res, next) => {
+exports.getShopMonthlyRevenue = async (req, res, next) => {
     const shopId = req.params.shopId;
 
     try {
-        console.log(shopId);
-        const shopRecords = await ShopRecords.findOne({shopId});
-        if (!shopRecords){
+        const shopRecords = await ShopRecords.findOne({ shopId });
+        if (!shopRecords) {
             res.status(404).json("Error finding shop records");
-        return;
+            return;
         }
 
         const Jan = shopRecords.records.filter(item => item.month === "0");
-        const Feb = shopRecords.records.filter(item => item.month === "0");
-        console.log(Jan);
+        const Dec = shopRecords.records.filter(item => item.month === "11");
+        const Nov = shopRecords.records.filter(item => item.month === "10");
 
+        const NovRevenue = Nov.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + entry.youGot;
+            }
+            return sum;
+        }, 0);
+        const DecRevenue = Dec.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + entry.youGot;
+            }
+            return sum;
+        }, 0);
+        const JanRevenue = Jan.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + entry.youGot;
+            }
+            return sum;
+        }, 0);
 
-        res.status(200);
+        if (shopRecords.monthlyRecords[0].month === "November") {
+            shopRecords.monthlyRecords[0].revenue = NovRevenue;
+        } else {
+            shopRecords.monthlyRecords.push({
+                revenue: NovRevenue,
+                month: "November"
+            })
+        }
+
+        if (shopRecords.monthlyRecords[1].month === "December") {
+            shopRecords.monthlyRecords[1].revenue = DecRevenue;
+        } else {
+            shopRecords.monthlyRecords.push({
+                revenue: DecRevenue,
+                month: "December"
+            })
+        }
+
+        if (shopRecords.monthlyRecords[2].month === "January") {
+            shopRecords.monthlyRecords[2].revenue = JanRevenue;
+        } else {
+            shopRecords.monthlyRecords.push({
+                revenue: JanRevenue,
+                month: "January"
+            })
+        }
+
+        await shopRecords.save();
+
+        const shopRecord = await ShopRecords.findOne({ shopId });
+        const xData = [10, 11, 0];
+        const yData = [shopRecord.monthlyRecords[0].revenue, shopRecord.monthlyRecords[1].revenue,
+        shopRecord.monthlyRecords[2].revenue];
+
+        const { slope, intercept } = linearRegression(xData, yData);
+        const newX = 1;
+        const predictedY = slope * newX + intercept;
+        console.log(`Predicted Y for ${ newX }: ${ predictedY }`);
+        shopRecord.predictedRevenue = predictedY;
+        await shopRecord.save();
+        res.status(200).json({message: "Done", shopRecord});
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         next(error);
     }
+}
+
+
+function mean(arr) {
+    return arr.reduce((sum, value) => sum + value, 0) / arr.length;
+}
+
+function calculateNumeratorAndDenominator(x, y, xMean) {
+    let numerator = 0;
+    let denominator = 0;
+
+    for (let i = 0; i < x.length; i++) {
+        numerator += (x[i] - xMean) * (y[i] - mean(y));
+        denominator += Math.pow(x[i] - xMean, 2);
+    }
+
+    return { numerator, denominator };
+}
+
+function calculateSlope(numerator, denominator) {
+    return numerator / denominator;
+}
+
+function calculateIntercept(xMean, yMean, slope) {
+    return yMean - slope * xMean;
+}
+
+function linearRegression(x, y) {
+    if (x.length !== y.length) {
+        throw new Error("Input arrays must have the same length");
+    }
+
+    const xMean = mean(x);
+    const yMean = mean(y);
+
+    const { numerator, denominator } = calculateNumeratorAndDenominator(x, y, xMean);
+
+    const slope = calculateSlope(numerator, denominator);
+    const intercept = calculateIntercept(xMean, yMean, slope);
+
+    return { slope, intercept };
 }

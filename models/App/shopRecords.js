@@ -17,7 +17,6 @@ const records = new Schema({
     }
 })
 const monthlyRecord = new Schema({
-    date: String,
     month: String,
     revenue: Number
 })
@@ -47,6 +46,10 @@ const shopRecordsSchema = new Schema({
         ref: "Shop",
         required: true
     },
+    predictedRevenue: {
+        type: Number,
+        required: false
+    }
 
 },
     { timestamps: true }

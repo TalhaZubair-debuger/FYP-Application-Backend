@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const monthlyRecord = new Schema({
+    month: String,
+    revenue: Number
+})
+
 const productSchema = Schema({
     productId: {
         type: String,
@@ -27,11 +32,15 @@ const productSchema = Schema({
         type: Array,
         required: false
     },
-    
+    monthlyRecords: [monthlyRecord],
     totalRevenue: {
         type: Number,
         required: false
     },
+    predictedRevenue: {
+        type: Number,
+        required: false
+    }
 }, {
     timestamps: true
 })

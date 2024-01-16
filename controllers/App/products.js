@@ -2,6 +2,8 @@ const { validationResult } = require("express-validator");
 const Product = require("../../models/App/product");
 const User = require("../../models/App/user");
 const { calculateProductRevenueOnUserLogin } = require("../../utils/revenueCalculator");
+const ss = require('simple-statistics');
+
 
 exports.addProduct = async (req, res, next) => {
     const errors = validationResult(req);
@@ -208,16 +210,145 @@ exports.getCalculateRevenue = async (req, res, next) => {
 
     try {
         const response = await calculateProductRevenueOnUserLogin(user);
-        if (response !== null){
-            res.status(201);
+        if (response !== null) {
+            res.status(201).json({ message: "Done" });
         }
-        else{
-            res.status(500).json({message: "Product revenue calculation problem"});
+        else {
+            res.status(500).json({ message: "Product revenue calculation problem" });
         }
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
-        next(error);       
+        next(error);
     }
 }
+
+exports.getProductMonthlyRevenue = async (req, res, next) => {
+    const productId = req.params.productId;
+
+    try {
+        const productRecords = await Product.findById(productId);
+        if (!productRecords) {
+            res.status(404).json("Error finding product records");
+            return;
+        }
+
+        const Jan = productRecords.revenue.filter(item => item.month == "0");
+        const Dec = productRecords.revenue.filter(item => item.month == "11");
+        const Nov = productRecords.revenue.filter(item => item.month == "10");
+
+        const NovRevenue = Nov.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + parseInt(entry.youGot);
+            }
+            return sum;
+        }, 0);
+        const DecRevenue = Dec.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + parseInt(entry.youGot);
+            }
+            return sum;
+        }, 0);
+        const JanRevenue = Jan.reduce((sum, entry) => {
+            if (typeof entry.youGot === 'number') {
+                return sum + parseInt(entry.youGot);
+            }
+            return sum;
+        }, 0);
+
+        if (productRecords.monthlyRecords[0].month == "10") {
+            productRecords.monthlyRecords[0].revenue = NovRevenue;
+        }
+        else {
+            productRecords.monthlyRecords.push({
+                revenue: NovRevenue,
+                month: "10"
+            })
+        }
+
+        if (productRecords.monthlyRecords[1].month == "11") {
+            productRecords.monthlyRecords[1].revenue = DecRevenue;
+        }
+        else {
+            productRecords.monthlyRecords.push({
+                revenue: DecRevenue,
+                month: "11"
+            })
+        }
+
+        if (productRecords.monthlyRecords[2].month == "0") {
+            productRecords.monthlyRecords[2].revenue = JanRevenue;
+        }
+        else {
+            productRecords.monthlyRecords.push({
+                revenue: JanRevenue,
+                month: "0"
+            })
+        }
+
+        await productRecords.save();
+
+        const product = await Product.findById(productId);
+        const xData = [10, 11, 0];
+        const yData = [product.monthlyRecords[0].revenue, product.monthlyRecords[1].revenue,
+        product.monthlyRecords[2].revenue];
+
+        const { slope, intercept } = linearRegression(xData, yData);
+        const newX = 1;
+        const predictedY = slope * newX + intercept;
+        console.log(`Predicted Y for ${ newX }: ${ predictedY }`);
+        product.predictedRevenue = predictedY;
+        await product.save();
+
+        res.status(200).json({ message: "Done calculating monthly records", productMonthlyData: productRecords });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+function mean(arr) {
+    return arr.reduce((sum, value) => sum + value, 0) / arr.length;
+}
+
+function calculateNumeratorAndDenominator(x, y, xMean) {
+    let numerator = 0;
+    let denominator = 0;
+
+    for (let i = 0; i < x.length; i++) {
+        numerator += (x[i] - xMean) * (y[i] - mean(y));
+        denominator += Math.pow(x[i] - xMean, 2);
+    }
+
+    return { numerator, denominator };
+}
+
+function calculateSlope(numerator, denominator) {
+    return numerator / denominator;
+}
+
+function calculateIntercept(xMean, yMean, slope) {
+    return yMean - slope * xMean;
+}
+
+function linearRegression(x, y) {
+    if (x.length !== y.length) {
+        throw new Error("Input arrays must have the same length");
+    }
+
+    const xMean = mean(x);
+    const yMean = mean(y);
+
+    const { numerator, denominator } = calculateNumeratorAndDenominator(x, y, xMean);
+
+    const slope = calculateSlope(numerator, denominator);
+    const intercept = calculateIntercept(xMean, yMean, slope);
+
+    return { slope, intercept };
+}
+
+// Example usage:
+

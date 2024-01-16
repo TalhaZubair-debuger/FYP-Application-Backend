@@ -60,4 +60,6 @@ router.delete("/delete-product/:productId", isAuth, productController.deleteProd
 
 router.get("/update-product-revenue", isAuth, productController.getCalculateRevenue);
 
+router.get("/update-product-monthly-records/:productId", isAuth, productController.getProductMonthlyRevenue);
+
 module.exports = router;
