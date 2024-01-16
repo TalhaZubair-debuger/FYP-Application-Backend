@@ -257,34 +257,36 @@ exports.getProductMonthlyRevenue = async (req, res, next) => {
             return sum;
         }, 0);
 
-        if (productRecords.monthlyRecords[0].month == "10") {
-            productRecords.monthlyRecords[0].revenue = NovRevenue;
-        }
-        else {
+
+        if (!productRecords.monthlyRecords[0]) {
             productRecords.monthlyRecords.push({
-                revenue: NovRevenue,
+                revenue: NovRevenue ? NovRevenue : 0,
                 month: "10"
             })
         }
-
-        if (productRecords.monthlyRecords[1].month == "11") {
-            productRecords.monthlyRecords[1].revenue = DecRevenue;
+        else if (productRecords.monthlyRecords[0].month == "10") {
+            productRecords.monthlyRecords[0].revenue = NovRevenue ? NovRevenue : 0;
         }
-        else {
+
+        if (!productRecords.monthlyRecords[1]){
             productRecords.monthlyRecords.push({
-                revenue: DecRevenue,
+                revenue: DecRevenue ? DecRevenue : 0,
                 month: "11"
             })
         }
-
-        if (productRecords.monthlyRecords[2].month == "0") {
-            productRecords.monthlyRecords[2].revenue = JanRevenue;
+        else if (productRecords.monthlyRecords[1].month == "11") {
+            productRecords.monthlyRecords[1].revenue = DecRevenue ? DecRevenue : 0;
         }
-        else {
+
+
+        if (!productRecords.monthlyRecords[2]){
             productRecords.monthlyRecords.push({
-                revenue: JanRevenue,
+                revenue:  JanRevenue ? JanRevenue : 0,
                 month: "0"
             })
+        }
+        else if (productRecords.monthlyRecords[2].month == "0") {
+            productRecords.monthlyRecords[2].revenue = JanRevenue ? JanRevenue : 0;
         }
 
         await productRecords.save();
@@ -297,7 +299,7 @@ exports.getProductMonthlyRevenue = async (req, res, next) => {
         const { slope, intercept } = linearRegression(xData, yData);
         const newX = 1;
         const predictedY = slope * newX + intercept;
-        console.log(`Predicted Y for ${ newX }: ${ predictedY }`);
+        console.log(`Predicted Y for ${newX}: ${predictedY}`);
         product.predictedRevenue = predictedY;
         await product.save();
 
@@ -309,6 +311,7 @@ exports.getProductMonthlyRevenue = async (req, res, next) => {
         next(error);
     }
 }
+
 
 function mean(arr) {
     return arr.reduce((sum, value) => sum + value, 0) / arr.length;

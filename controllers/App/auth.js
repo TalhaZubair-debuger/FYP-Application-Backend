@@ -120,7 +120,7 @@ exports.getUserDetails = async (req, res, next) => {
         }
         else {
             const newDate = new Date();
-            if (user.dueCalculation < newDate || user.dueCalculation == null) {
+            // if (user.dueCalculation < newDate || user.dueCalculation == null) {
                 const shopRecords = await ShopRecords.find({ userId });
                 if (!shopRecords) {
                     res.status(201).json({ message: "User found!", user: user })
@@ -133,7 +133,7 @@ exports.getUserDetails = async (req, res, next) => {
                 user.dueCalculation = dueDate;
 
                 await user.save();
-            }
+            // }
             res.status(201).json({ message: "User found!", user: user })
         }
     } catch (error) {
@@ -168,7 +168,7 @@ exports.postGetInvestment = async (req, res, next) => {
         user.companyName = companyName;
         user.stripePublishableKey = stripePublishableKey;
         user.stripePrivateKey = stripePrivateKey;
-
+        user.gotInvestment = false;
         await user.save();
 
         res.status(200).json({ message: "Investment information saved!" });
@@ -186,8 +186,9 @@ exports.getDistributorsNeedInvestment = async (req, res, next) => {
         if (!users) {
             res.status(404).json({ message: "No Distributors found!" });
         }
+        let products;
         const productsPromises = users.map(async (item) => {
-            const products = await Product.find({ user: item._id });
+            products = await Product.find({ user: item._id });
             return { user: item, products };
         });
 

@@ -77,7 +77,7 @@ exports.addShopRecords = async (req, res, next) => {
                 productExist.stockQuantity = productExist.stockQuantity - quantity;
                 productExist.revenue.push({
                     youGave,
-                    youGot: parseInt(youGot),
+                    youGot: youGot === null ? youGot : parseInt(youGot),
                     date,
                     month
                 })
@@ -130,7 +130,7 @@ exports.addShopRecords = async (req, res, next) => {
 
                         productExist.revenue.push({
                             youGave,
-                            youGot: parseInt(youGot),
+                            youGot: youGot === null ? youGot : parseInt(youGot),
                             date,
                             month
                         })
@@ -218,31 +218,35 @@ exports.getShopMonthlyRevenue = async (req, res, next) => {
             return sum;
         }, 0);
 
-        if (shopRecords.monthlyRecords[0].month === "November") {
-            shopRecords.monthlyRecords[0].revenue = NovRevenue;
-        } else {
+
+        if (!shopRecords.monthlyRecords[0]){
             shopRecords.monthlyRecords.push({
                 revenue: NovRevenue,
                 month: "November"
             })
         }
+        else if ( shopRecords.monthlyRecords[0].month === "November") {
+            shopRecords.monthlyRecords[0].revenue = NovRevenue;
+        } 
 
-        if (shopRecords.monthlyRecords[1].month === "December") {
-            shopRecords.monthlyRecords[1].revenue = DecRevenue;
-        } else {
+        if (!shopRecords.monthlyRecords[1]){
             shopRecords.monthlyRecords.push({
                 revenue: DecRevenue,
                 month: "December"
             })
         }
+        else if ( shopRecords.monthlyRecords[1].month === "December") {
+            shopRecords.monthlyRecords[1].revenue = DecRevenue;
+        } 
 
-        if (shopRecords.monthlyRecords[2].month === "January") {
-            shopRecords.monthlyRecords[2].revenue = JanRevenue;
-        } else {
+        if (!shopRecords.monthlyRecords[2]){
             shopRecords.monthlyRecords.push({
                 revenue: JanRevenue,
                 month: "January"
             })
+        }
+        else if ( shopRecords.monthlyRecords[2].month === "January") {
+            shopRecords.monthlyRecords[2].revenue = JanRevenue;
         }
 
         await shopRecords.save();

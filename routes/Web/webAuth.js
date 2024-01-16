@@ -55,4 +55,6 @@ router.post("/generate-payment-request/:userId", isAuth, webAuthController.gener
 
 router.get("/get-payment-requests", isAuth, webAuthController.getPaymentRequests);
 
+router.post("/handle-investments", isAuth);
+
 module.exports = router;

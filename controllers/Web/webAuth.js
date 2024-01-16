@@ -152,3 +152,27 @@ exports.getPaymentRequests = async (req, res, next) => {
     }
 }
 
+exports.postHandleInvestments = async (req, res, next) => {
+    const distributorId = req.params.userId;
+
+    try {
+        const distributor = await User.findById(distributorId);
+        if (!distributor) {
+            res.status(404).json({ message: "Error finding the distributor!" });
+        }
+        const stripe = require('stripe')(distributor.stripePrivateKey);
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount * 100,
+            currency: 'pkr',
+        });
+
+        res.status(200).json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
