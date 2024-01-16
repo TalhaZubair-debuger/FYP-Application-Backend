@@ -173,7 +173,7 @@ exports.updateStocks = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
-        product.stockQuantity = stockQuantity;
+        product.stockQuantity += parseInt(stockQuantity);
         await product.save();
         const user = await User.findById(req.userId);
         user.currentTotalStock += parseInt(stockQuantity);
